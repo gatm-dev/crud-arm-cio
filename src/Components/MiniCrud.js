@@ -1,7 +1,19 @@
 import React, { useState, useEffect, useContext } from "react";
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
-import { Grid, Button, Tooltip, Box, TextField } from "@mui/material";
-import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
+import {
+  Grid,
+  Button,
+  Tooltip,
+  Box,
+  TextField,
+  Typography,
+  Modal,
+} from "@mui/material";
+import {
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Circle as CircleIcon,
+} from "@mui/icons-material";
 
 export const filterByValue = (array = [], string) =>
   array?.filter((o) =>
@@ -21,16 +33,16 @@ export const RenameProperty = (objArray, originalIdName, newName) =>
     return newObject;
   });
 
-export const DataGridColumnsDef = (objArray = []) => {
-  const handleEditar = (id) => console.log({ editar: id });
-  const handleBorrar = (id) => console.log({ borrar: id });
-
+const DataGridColumnsDef = (objArray = []) => {
   const def = Object.keys(objArray[0]).map((key, i) => ({
-    field: i === 0 ? "id" : key,
+    field: key,
     headerName: key,
-    minWidth: 100,
+    minWidth: Math.max(
+      ...Object.keys(objArray).map((o) => String(o[key]).length * 20)
+    ),
     headerAlign: "center",
     editable: false,
+    align: typeof key === "number" ? "right" : "left",
     renderCell: (params) => (
       <Tooltip title={params.value}>
         <span className="table-cell-trucate">{params.value}</span>
@@ -45,23 +57,18 @@ export const DataGridColumnsDef = (objArray = []) => {
     width: 100,
     getActions: ({ id }) => [
       <GridActionsCellItem
-        label="Editar"
-        icon={<EditIcon />}
-        onClick={handleEditar(id)}
-      />,
-      <GridActionsCellItem
         label="Borrar"
         icon={<DeleteIcon />}
-        onClick={handleBorrar(id)}
+        /*onClick={() => setOpenModal(true)}*/
       />,
     ],
   };
 
-  return [...def, editAndDelete];
+  return [editAndDelete, ...def];
 };
 
 export const MiniCrud = ({
-  data,
+  data = [],
   handleEdit,
   handleDelete,
   newFormComponent = <>Sin formulario</>,
@@ -75,61 +82,63 @@ export const MiniCrud = ({
   }, [toFind]);
 
   return (
-    <Grid
-      container
-      direction="row"
-      justifyContent="flex-end"
-      justifyItems={"center"}
-      spacing={2}
-    >
-      <Grid item xs>
-        <TextField
-          variant="standard"
-          placeholder="Buscar"
-          value={toFind}
-          onChange={(e) => setToFind(e.target.value)}
-          fullWidth
-          size="small"
-        />
-      </Grid>
-      <Grid item xs="auto">
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          onClick={() => setOpenNew(!openNew)}
-        >
-          {openNew ? "Cerrar" : "Nuevo"}
-        </Button>
-      </Grid>
-      {openNew ? (
-        <Grid item xs={12}>
-          {newFormComponent}
+    <>
+      <Grid
+        container
+        direction="row"
+        justifyContent="flex-end"
+        justifyItems={"center"}
+        spacing={2}
+      >
+        <Grid item xs>
+          <TextField
+            variant="standard"
+            placeholder="Buscar"
+            value={toFind}
+            onChange={(e) => setToFind(e.target.value)}
+            fullWidth
+            size="small"
+          />
         </Grid>
-      ) : (
-        <></>
-      )}
-      <Grid item xs={12}>
-        {filteredData.length > 0 ? (
-          <Box sx={{ minHeight: 400, height: "100%", width: "100%" }}>
-            <DataGrid
-              sx={{ height: "100%" }}
-              rows={filteredData}
-              columns={DataGridColumnsDef(data)}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 5,
-                  },
-                },
-              }}
-              pageSizeOptions={[5]}
-            />
-          </Box>
+        <Grid item xs="auto">
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => setOpenNew(!openNew)}
+          >
+            {openNew ? "Cerrar" : "Nuevo"}
+          </Button>
+        </Grid>
+        {openNew ? (
+          <Grid item xs={12}>
+            {newFormComponent}
+          </Grid>
         ) : (
-          <h3>No hay datos</h3>
+          <></>
         )}
+        <Grid item xs={12}>
+          {filteredData.length > 0 ? (
+            <Box sx={{ minHeight: 400, height: "100%", width: "100%" }}>
+              <DataGrid
+                sx={{ height: "100%" }}
+                rows={filteredData}
+                columns={DataGridColumnsDef(data)}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 5,
+                    },
+                  },
+                }}
+                pageSizeOptions={[5]}
+              />
+            </Box>
+          ) : (
+            <h3>No hay datos</h3>
+          )}
+        </Grid>
       </Grid>
-    </Grid>
+    </>
   );
 };

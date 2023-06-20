@@ -1,90 +1,84 @@
 import React, { useState, useEffect, useContext } from "react";
-import { SesionContext } from "../Context/SesionContext";
+import { SesionContext, endpoint } from "../Context/SesionContext";
 import { useNavigate } from "react-router";
-import { Grid, Button, Container, TextField } from "@mui/material";
+import { Grid, Button, Container } from "@mui/material";
 import { MiniCrud, RenameProperty } from "../Components/MiniCrud";
+import FormAddNewElement from "../Components/FormAddNewElement";
 
-const getData = async (url) => {
-  const response = await fetch(url);
+const getData = async (url, token) => {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   const data = await response;
   if (data.ok) return data.json();
-  else {
+  else
     return data.json().then((error) => {
       throw new Error(error?.ExceptionMessage);
     });
-  }
 };
 
-const postData = async (url, payload) => {
+const postData = async (url, token, payload) => {
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify(payload),
   });
+
   const data = await response;
   if (data.ok) return data.json();
-  else {
+  else
     return data.json().then((error) => {
       throw new Error(error?.ExceptionMessage);
     });
-  }
-};
-
-const AddNewFrame = ({}) => {
-  const [postPayload, setPostPayload] = useState({
-    Marca: "",
-    Modelo: "",
-  });
-
-  return (
-    <Grid container direction="row" justifyContent="center">
-      <Grid item xs={12}>
-        <h3>Agregar nuevo</h3>
-      </Grid>
-      <Grid item xs={3}>
-        <TextField
-          variant="standard"
-          placeholder="Marca"
-          value={postPayload?.Marca}
-          onChange={(e) =>
-            setPostPayload({ ...postPayload, Marca: e.target.value })
-          }
-          fullWidth
-          size="small"
-        />
-      </Grid>
-      <Grid item xs={3}>
-        <TextField
-          variant="standard"
-          placeholder="Modelo"
-          value={postPayload?.Modelo}
-          onChange={(e) =>
-            setPostPayload({ ...postPayload, Modelo: e.target.value })
-          }
-          fullWidth
-          size="small"
-        />
-      </Grid>
-    </Grid>
-  );
 };
 
 const Home = () => {
   const { usuario, token, setToken } = useContext(SesionContext);
   const navigate = useNavigate();
+  const [dataArmazones, setDataArmazones] = useState([]);
+  const [dataPreciosArmazones, setDataPreciosArmazones] = useState([]);
+  const [dataStock, setDataStock] = useState([]);
+
+  const handleSetDataArmazones = () =>
+    getData(`${endpoint}/get-catarmcio`, token)
+      .then((data) => setDataArmazones(RenameProperty(data, "IdReg", "id")))
+      .catch((error) => console.log(error));
+
+  const handleSetDataPreciosArmazones = () =>
+    getData(`${endpoint}/get-catpreciosarmcio`, token)
+      .then((data) =>
+        setDataPreciosArmazones(RenameProperty(data, "IdReg", "id"))
+      )
+      .catch((error) => console.log(error));
+
+      const handleSetDataStock = () =>
+      getData(`${endpoint}/get-stockarmcio`, token)
+        .then((data) =>
+          setDataStock(RenameProperty(data, "IdReg", "id"))
+        )
+        .catch((error) => console.log(error));
+
+  useEffect(() => {
+    handleSetDataArmazones();
+    handleSetDataPreciosArmazones();
+    handleSetDataStock();
+  }, []);
 
   useEffect(() => {
     if (token === null) navigate("/login");
   }, [token]);
 
-  const dummyData = [
-    { IdReg: 1, Nombre: "Juan", Apellido: "Perez" },
-    { IdReg: 2, Nombre: "Pedro", Apellido: "Gomez" },
-  ];
-
   return (
-    <Container fluid>
-      <Grid container>
+    <Container fluid="true">
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <Grid container direction="row" justifyContent="center">
             <Grid item xs>
@@ -111,21 +105,92 @@ const Home = () => {
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <Grid container>
-            <Grid item xs={9}>
-              <Grid container direction="row" justifyContent="center">
-                <Grid item xs={12}>
-                  <Grid item xs={12}>
-                    <MiniCrud
-                      data={RenameProperty(dummyData, "IdReg", "id")}
-                      newFormComponent={<AddNewFrame />}
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              {dataArmazones.length > 0 ? (
+                <MiniCrud
+                  data={dataArmazones}
+                  newFormComponent={
+                    <FormAddNewElement
+                      formTitle={"Agregar nuevo armazón"}
+                      postEndpoint={`${endpoint}/post-catarmcio`}
+                      handleReloadData={handleSetDataArmazones}
+                      model={{
+                        Sku: "",
+                        SkuPriority: "",
+                        DesProducto: "",
+                        Ean: "",
+                        Marca: "",
+                        Modelo: "",
+                        Genero: "",
+                        Material: "",
+                        Color: "",
+                        TipoArm: "",
+                        EsClip: false,
+                        Forma: "",
+                        Puente: 0,
+                        Varilla: 0,
+                        Vertice: 0,
+                        Med_A: 0,
+                        Med_B: 0,
+                        Med_ED: 0,
+                        Med_DBL: 0,
+                      }}
                     />
-                  </Grid>
-                  <Grid item xs={12}></Grid>
-                </Grid>
-              </Grid>
+                  }
+                />
+              ) : (
+                <h3>Cargando...</h3>
+              )}
             </Grid>
-            <Grid item xs={8}></Grid>
+            <Grid item xs={12}>
+              {dataPreciosArmazones.length > 0 ? (
+                <MiniCrud
+                  data={dataPreciosArmazones}
+                  newFormComponent={
+                    <FormAddNewElement
+                      formTitle={"Agregar nuevo precio de armazón"}
+                      postEndpoint={`${endpoint}/post-catpreciosarmcio`}
+                      handleReloadData={handleSetDataPreciosArmazones}
+                      model={{
+                        Marca: "",
+                        AcronimoSku1: "",
+                        EsClip: false,
+                        PrecioSinIva: 0,
+                        Iva: 0,
+                        Division: "",
+                        Ordsuc: "",
+                      }}
+                    />
+                  }
+                />
+              ) : (
+                <h3>Cargando...</h3>
+              )}
+            </Grid>
+            <Grid item xs={12}>
+              {dataStock.length > 0 ? (
+                <MiniCrud
+                  data={dataStock}
+                  newFormComponent={
+                    <FormAddNewElement
+                      formTitle={"Agregar armazón a alguna cuenta"}
+                      postEndpoint={`${endpoint}/post-stockarmcio`}
+                      handleReloadData={handleSetDataStock}
+                      model={{
+                        IdArmCio: 0,
+                        Sku: "",
+                        Piezas: 0,
+                        Division: "",
+                        Ordsuc: "",
+                      }}
+                    />
+                  }
+                />
+              ) : (
+                <h3>Cargando...</h3>
+              )}
+            </Grid>
           </Grid>
         </Grid>
       </Grid>

@@ -15,10 +15,14 @@ export const SesionProvider = ({ children }) => {
           Authorization: `Bearer ${token}`,
         },
       })
-        .then((res) => (res.status === 200 ? res.json() : () => {
-          setUsuario(null);
-          setToken(null);
-        }))
+        .then((res) =>
+          res.status === 200
+            ? res.json()
+            : () => {
+                setUsuario(null);
+                setToken(null);
+              }
+        )
         .then((res) => {
           setUsuario(res);
         })
