@@ -59,12 +59,10 @@ const Home = () => {
       )
       .catch((error) => console.log(error));
 
-      const handleSetDataStock = () =>
-      getData(`${endpoint}/get-stockarmcio`, token)
-        .then((data) =>
-          setDataStock(RenameProperty(data, "IdReg", "id"))
-        )
-        .catch((error) => console.log(error));
+  const handleSetDataStock = () =>
+    getData(`${endpoint}/get-stockarmcio`, token)
+      .then((data) => setDataStock(RenameProperty(data, "IdReg", "id")))
+      .catch((error) => console.log(error));
 
   useEffect(() => {
     handleSetDataArmazones();
@@ -82,7 +80,7 @@ const Home = () => {
         <Grid item xs={12}>
           <Grid container direction="row" justifyContent="center">
             <Grid item xs>
-              <h2>Home</h2>
+              <h2>Pagina principal</h2>
             </Grid>
             <Grid item xs>
               <span>Hola {usuario?.NombreUsuario} </span>
@@ -107,6 +105,7 @@ const Home = () => {
         <Grid item xs={12}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
+              <h3>Armazones</h3>
               {dataArmazones.length > 0 ? (
                 <MiniCrud
                   data={dataArmazones}
@@ -144,6 +143,7 @@ const Home = () => {
               )}
             </Grid>
             <Grid item xs={12}>
+              <h3>Precios de armazones</h3>
               {dataPreciosArmazones.length > 0 ? (
                 <MiniCrud
                   data={dataPreciosArmazones}
@@ -169,6 +169,7 @@ const Home = () => {
               )}
             </Grid>
             <Grid item xs={12}>
+              <h3>Stock de armazones</h3>
               {dataStock.length > 0 ? (
                 <MiniCrud
                   data={dataStock}

@@ -43,7 +43,8 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <Grid container justifyContent="center" spacing={2}>
           <Grid item xs={12} sx={{ textAlign: "center" }}>
-            <h1>Inicio de sesión</h1>
+            <h1>Shamir MX</h1>
+            <h4>Administración de armazones</h4>
           </Grid>
           <Grid item xs={12}>
             <TextField

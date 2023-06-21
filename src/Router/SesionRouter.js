@@ -11,7 +11,7 @@ const SesionRouter = () => {
   const RouteHome = () => (token ? <Home /> : <Navigate to="/login" replace />);
 
   return (
-    <BrowserRouter basename="/">
+    <BrowserRouter basename="/cio-armazones">
       <Routes>
         <Route path="/login" element={<RouteLogin />} />
         <Route path="/" element={<RouteHome />} />

@@ -2,7 +2,8 @@ import React, { useState, useEffect, createContext } from "react";
 
 export const SesionContext = createContext();
 
-export const endpoint = "http://localhost:50427/armcio";
+export const endpoint = "https://api.frame-shamir.com/armcio"
+//"http://localhost:50427/armcio";
 
 export const SesionProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
